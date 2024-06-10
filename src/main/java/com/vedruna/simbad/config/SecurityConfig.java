@@ -23,16 +23,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // Deshabilitar CSRF ya que se usa JWT
                 .authorizeHttpRequests(authRequest -> authRequest
-                        // Permitir acceso a estos endpoints sin token
-                        .requestMatchers("/SimbadAPI/v1/auth/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/SimbadAPI/v1/auth/**").permitAll() // Permitir acceso sin autenticación
+                        .requestMatchers("/public/images/**").permitAll() // Permitir acceso sin autenticación a los recursos en /uploads/**
+                        .anyRequest().authenticated() // Requerir autenticación para cualquier otra solicitud
                 )
                 .sessionManagement(sessionManager -> sessionManager
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // No guardar estado de sesión
+                .authenticationProvider(authProvider) // Configurar el proveedor de autenticación
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // Añadir el filtro JWT antes del filtro de autenticación de usuario y contraseña
                 .build();
     }
 }
